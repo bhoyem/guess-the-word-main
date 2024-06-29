@@ -6,8 +6,10 @@ const guessesRemaining = document.querySelector(".remaining");
 const guessesRemainingSpan = document.querySelector(".remaining span");
 const guessMessages = document.querySelector(".message");
 const playAgainButton = document.querySelector(".play-again");
+const directions = document.querySelector("form label");
+console.log(directions.innerHTML);
 let word = "funny";
-const guessedLettersArray = [];
+let guessedLettersArray = [];
 let remainingGuesses = 8;
 
 
@@ -18,12 +20,12 @@ const getWord = async function () {
     const words = await request.text();
     // console.log(words);
     const wordArray = words.split("\n");
-    console.log(wordArray.length);
+    // console.log(wordArray.length);
 
     const selectRandomWord = function (wordArray) {
         const randomIndex = Math.floor(Math.random() * wordArray.length);
         const randomWord = wordArray[randomIndex];
-        console.log(randomIndex);
+        // console.log(randomIndex);
         console.log(`| x${randomWord}x |`);
         word = randomWord;
     };
@@ -106,8 +108,8 @@ const wordInProgress = function (letter) {
     const wordArray = wordUpper.split("");
     let wordInDots = (wordBeingGuessed.innerText).split("");
     let skipCountFlag = 0;
-    console.log(wordInDots);
-    console.log(wordArray);
+    // console.log(wordInDots);
+    // console.log(wordArray);
     console.log(guessedLettersArray);
     // for (const e of guessedLettersArray) {
     wordArray.forEach(function (i, index) {
@@ -128,7 +130,9 @@ const countGuesses = function () {
     remainingGuesses--;
     console.log(`Guesses remaining: ${remainingGuesses}`);
     if (remainingGuesses <= 0) {
-        guessesRemaining.innerText = `Sorry, you have run out of guesses. Try again?`;
+        guessMessages.classList.add("highlight");
+        guessMessages.innerText = `Sorry, you have run out of guesses. Try again?`;
+        startOver();
     } else if (remainingGuesses == 1) {
         guessesRemainingSpan.innerText = `${remainingGuesses} guess`;
     } else {
@@ -140,8 +144,9 @@ const countGuesses = function () {
 //This function checks if the player has guessed all the letters.
 const winOrLoss = function (currentWordInDots, answer) {
     if (currentWordInDots === answer) {
+        startOver();
         guessMessages.classList.add("win");
-        guessMessages.outerHTML = '<p class="highlight win">You guessed the word correctly!</p>';
+        guessMessages.innerText = 'You guessed the word correctly!';
     } //else {
     // remainingGuesses--;
     // console.log(`Guesses remaining: ${remainingGuesses}`);
@@ -156,3 +161,34 @@ const winOrLoss = function (currentWordInDots, answer) {
     return;
 };
 
+//This function will hide and/or reveal fields when the game ends.
+const startOver = function () {
+    guessButton.classList.add("hide");
+    guessesRemaining.classList.add("hide");
+    guessedLettersTracker.classList.add("hide");
+    letterGuess.classList.add("hide");
+    directions.classList.add("hide");
+    playAgainButton.classList.remove("hide");
+    return;
+};
+
+playAgainButton.addEventListener("click", function (e) {
+    guessButton.classList.remove("hide");
+    guessesRemaining.classList.remove("hide");
+    guessedLettersTracker.classList.remove("hide");
+    letterGuess.classList.remove("hide");
+    directions.classList.remove("hide");
+    playAgainButton.classList.add("hide");
+    letterGuess.value = "";
+    remainingGuesses = 8;
+    wordInProgress.innerText = "";
+    guessMessages.innerText = '';
+    if (guessMessages.classList.contains("win")) guessMessages.classList.remove("win");
+    if (guessMessages.classList.contains("highlight")) guessMessages.classList.remove("highlight");
+    guessMessages.classList.remove("win");
+    console.log(guessMessages.outerHTML);
+    guessedLettersArray = [];
+    guessedLettersTracker.innerHTML = "";
+    guessesRemainingSpan.innerText = `${remainingGuesses} guesses`;
+    getWord();
+});
